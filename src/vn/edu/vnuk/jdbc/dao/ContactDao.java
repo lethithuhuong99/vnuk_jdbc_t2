@@ -89,6 +89,108 @@ public List<Contact> read() throws SQLException{
 		}
 	}
 
+	@SuppressWarnings("finally")
+	public Contact read(Long id) throws SQLException{
+		
+		String sqlQuery = "select * from contacts where id = " + id + ";";
+		
+		PreparedStatement statement;
+		Contact contact = new Contact();
+		try {
+			statement = connection.prepareStatement(sqlQuery);
+	
+	        // 	Executing statement
+			ResultSet result = statement.executeQuery();
+			if (result.next()) {
+				contact = buildContact(result);
+			}
+			
+			result.close();
+			statement.close();
+			
+		}
+		catch(Exception e) {
+	        e.printStackTrace();
+	        connection.close();
+		}
+	
+		finally {
+	
+			connection.close();
+			return contact;
+		}
+	}
+
+	public void update (Long id, Contact contact) throws SQLException {	
+		Contact contactDefault = new Contact();
+		
+		String sqlQuery = "update contacts set name = ?, email = ?, address = ? where id = " + id + ";" ;
+		
+		PreparedStatement statement;
+		
+		try {
+			contactDefault = read(id);
+			statement = connection.prepareStatement(sqlQuery);
+			
+			statement.setString(1, contact.getName());
+			statement.setString(2, contact.getEmail());
+			statement.setString(3, contact.getAddress());
+			statement.setDate(4, new java.sql.Date(
+                    contact.getDateOfRegister().getTimeInMillis()));
+			
+			
+			if(contactDefault != null) {
+				int rowsUpdated = statement.executeUpdate();
+				
+				if(rowsUpdated > 0) {
+					System.out.println("Updated for ID: " + id);
+				} else {
+					System.out.println("ID NOT EXITS!");
+				}
+			} else {
+				System.out.println("ID NOT EXITS!");
+			}
+			
+			statement.close();
+		}
+		
+		catch(Exception e) {
+			e.printStackTrace();
+			connection.close();
+		}
+		
+		finally {
+			connection.close();
+		}
+	}
+
+
+	public void delete (Long id) throws SQLException {
+		
+		String sqlQuery = "delete * from contacts where id = " + id + ";" ;
+		
+		PreparedStatement statement;
+		Contact contact = new Contact();
+		
+		try {
+			contact = read(id);
+			statement = connection.prepareStatement(sqlQuery);
+	        
+			statement.executeUpdate();
+
+			statement.close();
+		}
+		catch(Exception e) {
+	        e.printStackTrace();
+	        connection.close();
+		}
+	
+		finally {
+			connection.close();
+		}
+		
+		
+	}
 	private Contact buildContact(ResultSet results) throws SQLException {
 		Contact contact = new Contact();
 		contact.setId(results.getLong("id"));
