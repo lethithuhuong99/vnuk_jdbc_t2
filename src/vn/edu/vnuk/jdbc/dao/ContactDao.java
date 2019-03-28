@@ -115,40 +115,35 @@ public List<Contact> read() throws SQLException{
 		}
 	
 		finally {
-	
-			connection.close();
 			return contact;
 		}
 	}
 
 	public void update (Long id, Contact contact) throws SQLException {	
-		Contact contactDefault = new Contact();
+		Contact contactExist = new Contact();
 		
-		String sqlQuery = "update contacts set name = ?, email = ?, address = ? where id = " + id + ";" ;
+		String sqlQuery = "update contacts set name = ?, email = ?, address = ? where id = " + id + ";";
 		
 		PreparedStatement statement;
 		
 		try {
-			contactDefault = read(id);
+			contactExist = read(id);
 			statement = connection.prepareStatement(sqlQuery);
 			
 			statement.setString(1, contact.getName());
 			statement.setString(2, contact.getEmail());
 			statement.setString(3, contact.getAddress());
-			statement.setDate(4, new java.sql.Date(
-                    contact.getDateOfRegister().getTimeInMillis()));
-			
-			
-			if(contactDefault != null) {
+				
+			if(contactExist != null) {
 				int rowsUpdated = statement.executeUpdate();
 				
 				if(rowsUpdated > 0) {
-					System.out.println("Updated for ID: " + id);
+					System.out.println("UPDATE ID: " + id);
 				} else {
-					System.out.println("ID NOT EXITS!");
+					System.out.println("ID NOT EXIST!");
 				}
 			} else {
-				System.out.println("ID NOT EXITS!");
+				System.out.println("ID NOT EXIST!");
 			}
 			
 			statement.close();
@@ -167,7 +162,7 @@ public List<Contact> read() throws SQLException{
 
 	public void delete (Long id) throws SQLException {
 		
-		String sqlQuery = "delete * from contacts where id = " + id + ";" ;
+		String sqlQuery = "delete from contacts where id = " + id + ";" ;
 		
 		PreparedStatement statement;
 		Contact contact = new Contact();
@@ -176,7 +171,13 @@ public List<Contact> read() throws SQLException{
 			contact = read(id);
 			statement = connection.prepareStatement(sqlQuery);
 	        
-			statement.executeUpdate();
+			int checkExist = statement.executeUpdate();
+			
+			if (checkExist != 0) {
+				System.out.println("DELETED ID: " + id);
+			}
+			else 
+				System.out.println("ID NOT EXIST!");
 
 			statement.close();
 		}
